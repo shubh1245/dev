@@ -9,6 +9,24 @@ try{
   const toUserId = req.params.toUserId;
   const status = req.params.status;
 
+//this api is only for ignore and interested 
+  const allowedStatus = ["ignored","interested"]
+  if(!allowedStatus.includes(status)){
+    return res.status(400).json1({
+      message : "Invalid status type " + status
+    });
+  }
+
+//If there is existing ConnectionRequest
+  const existingConnection = await ConnectionRequest.findOne({
+    $or: [
+      {fromUserId,toUserId},
+      {fromUserId : toUserId, toUserId : fromUserId}
+    ],
+  });
+  if(existingConnection){
+    res.status(400).send("Connection already exist")
+  }
   const connectionRequest = new ConnectionRequest({
     fromUserId,
     toUserId,
